@@ -27,7 +27,7 @@ CREATE TABLE turnstile (
     station_name VARCHAR,
     line VARCHAR
 ) WITH (
-    KAFKA_TOPIC = 'org.cta.transit.turnsite',
+    KAFKA_TOPIC = 'org.cta.transit.turnstiles',
     VALUE_FORMAT = 'avro',
     KEY = 'station_id'
 );
@@ -35,8 +35,9 @@ CREATE TABLE turnstile (
 CREATE TABLE turnstile_summary
 WITH (VALUE_FORMAT = 'JSON') AS
     SELECT station_id, COUNT(station_id)
-    FROM turnsite
-    GROUP BY station_id
+    FROM turnstile
+    GROUP BY station_id;
+    
 """
 
 

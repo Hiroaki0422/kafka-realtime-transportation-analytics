@@ -9,8 +9,8 @@ from confluent_kafka.avro import AvroProducer
 
 logger = logging.getLogger(__name__)
 
-BROKER_URL = 'PLAINTEXT:localhost:9092'
-SCHEMA_REGISTRY_URL = 'http:localhost:8081'
+BROKER_URL = 'PLAINTEXT://localhost:9092'
+SCHEMA_REGISTRY_URL = 'http://localhost:8081'
 
 
 class Producer:
@@ -48,6 +48,7 @@ class Producer:
 
         # If the topic does not already exist, try to create it
         if self.topic_name not in Producer.existing_topics:
+            logger.info(f'creating new topic: {self.topic_name}')
             self.create_topic()
             Producer.existing_topics.add(self.topic_name)
 
@@ -67,19 +68,22 @@ class Producer:
         #
         #
         # logger.info("topic creation kafka integration incomplete - skipping")
-        client = AdminClient({"bootstrap.servers": BROKER_URL})
+        logger.info('1')
+        client = AdminClient({'bootstrap.servers': self.broker_properties.get('bootstrap.servers')})
+        logger.info('2')
         
-        future = client.create_topics(
-            [
-                NewTopic(
-                    topic=self.topic_name,
-                    num_partitions=self.num_partitions,
-                    replication_factor=self.num_replicas
-                )
-            ]
-        )
+        if self.topic_name not in client.list_topics().topics:
+            logger.info('3')
+            futures = client.create_topics([NewTopic(topic=self.topic_name,
+                                            num_partitions=self.num_partitions,
+                                            replication_factor=self.num_replicas)])
+        else:
+            logger.info('4')
+            logger.info('topic already exists')
+            return
         
-        for topic, future in future.items():
+        for topic, future in futures.items():
+            logger.info('5')
             try:
                 future.result()
                 logger.info(f"topic {topic} created")

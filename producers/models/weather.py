@@ -81,7 +81,6 @@ class Weather(Producer):
         # specify the Avro schemas and verify that you are using the correct Content-Type header.
         #
         #
-        logger.info("weather kafka proxy integration incomplete - skipping")
         resp = requests.post(
            #
            #
@@ -94,7 +93,7 @@ class Weather(Producer):
            # TODO: What Headers need to bet set?
            #
            #
-           headers={"Content-Type": "application/vnd.kafka.json.v2+json"},
+           headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
            data=json.dumps(
                {
                    #

@@ -44,7 +44,9 @@ class KafkaConsumer:
                 # TODO
                 #
             'bootstrap.servers': BROKER_URL,
-            'schema.registry.url': SCHEMA_REGISTRY_URL
+            'schema.registry.url': SCHEMA_REGISTRY_URL,
+            'group.id': 'cta_kafka_consumer',
+            "default.topic.config": {"auto.offset.reset": "earliest" if self.offset_earliest else None}
         }
 
         # TODO: Create the Consumer, using the appropriate type.
@@ -52,7 +54,7 @@ class KafkaConsumer:
             self.broker_properties["schema.registry.url"] = "http://localhost:8081"
             self.consumer = AvroConsumer(self.broker_properties)
         else:
-            self.consumer = Consumer({'bootstrap.servers': BROKER_URL})
+            self.consumer = Consumer(self.broker_properties)
             pass
 
         #
@@ -67,7 +69,7 @@ class KafkaConsumer:
         """Callback for when topic assignment takes place"""
         # TODO: If the topic is configured to use `offset_earliest` set the partition offset to
         # the beginning or earliest
-        logger.info("on_assign is incomplete - skipping")
+        # logger.info("on_assign is incomplete - skipping")
         for partition in partitions:
             #
             #
@@ -97,7 +99,7 @@ class KafkaConsumer:
         # is retrieved.
         #
         #
-        logger.info("_consume is incomplete - skipping")
+        # logger.info("_consume is incomplete - skipping")
         
         while True:
             message = self.consumer.poll(timedelta=1.0)
@@ -107,6 +109,7 @@ class KafkaConsumer:
             elif message.error():
                 logger.info(message.error())
             else:
+                self.message_handler(message)
                 return 1
         
 
